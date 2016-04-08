@@ -6,6 +6,7 @@ SUBDIRS = 		\
 	model		\
 	view		\
 	intro		\
+	saveaspanel	   \
 	util		\
 	webservice
 
