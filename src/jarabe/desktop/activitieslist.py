@@ -56,6 +56,9 @@ class ActivitiesTreeView(Gtk.TreeView):
     def __init__(self):
         Gtk.TreeView.__init__(self)
         self.set_can_focus(False)
+        self.props.activate_on_single_click = True
+
+        self.connect('row-activated', self.__on_row_activated)
 
         self._query = ''
 
@@ -80,7 +83,6 @@ class ActivitiesTreeView(Gtk.TreeView):
             self.append_column(column)
 
         self.cell_icon = CellRendererActivityIcon()
-        self.cell_icon.connect('clicked', self.__icon_clicked_cb)
 
         column = Gtk.TreeViewColumn()
         column.pack_start(self.cell_icon, True)
@@ -154,8 +156,11 @@ class ActivitiesTreeView(Gtk.TreeView):
             not row[self._model.column_favorites[cell.favorite_view]],
             cell.favorite_view)
 
-    def __icon_clicked_cb(self, cell, path):
-        self._start_activity(path)
+    def __on_row_activated(self, treeview, path, col):
+        # Checks if the 'star' icon is clicked
+        if col is not treeview.get_column(0):
+            model = treeview.get_model()
+            self._start_activity(path)
 
     def _start_activity(self, path):
         model = self.get_model()
@@ -180,10 +185,6 @@ class ActivitiesTreeView(Gtk.TreeView):
         title = model[tree_iter][self._model.column_title]
         title = normalize_string(title.decode('utf-8'))
         return title is not None and title.find(self._query) > -1
-
-    def do_row_activated(self, path, column):
-        if column == self._icon_column:
-            self._start_activity(path)
 
     def create_palette(self, path, column):
         if column == self._icon_column:
